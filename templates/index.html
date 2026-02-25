@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IOCs Intelligence</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-[#0f172a] text-white min-h-screen flex flex-col font-sans">
+
+    <nav class="p-6 border-b border-slate-800 bg-[#0f172a]/50 backdrop-blur-md sticky top-0 z-50">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-blue-500">
+                <a href="/" class="flex items-center hover:opacity-80 transition">
+                    <i class="fas fa-shield-alt mr-2"></i>IOCs Intelligence
+                </a>
+            </h1>
+
+            <div class="flex items-center gap-4">
+                {% if username %}
+                    <div class="flex items-center gap-6">
+                        <span class="text-slate-400 hidden md:block">
+                            <i class="fas fa-user-circle mr-1"></i> 
+                            Welcome, <b class="text-blue-400">{{ username }}</b>
+                        </span>
+                        <a href="/history" class="bg-slate-800 px-4 py-2 rounded-xl hover:bg-slate-700 transition border border-slate-700 text-sm">
+                            <i class="fas fa-history mr-1"></i> My History
+                        </a>
+                        <a href="/logout" class="text-red-400 hover:text-red-300 text-sm font-medium transition">
+                            Logout
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="flex gap-3">
+                        <a href="/login" class="text-slate-300 hover:text-white px-4 py-2 transition text-sm font-medium">Sign In</a>
+                        <a href="/register" class="bg-blue-600 px-4 py-2 rounded-xl hover:bg-blue-500 transition shadow-lg shadow-blue-500/20 text-sm font-bold">Register</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-1 flex flex-col justify-center items-center px-4">
+        <div class="text-center mb-10">
+            <h2 class="text-5xl font-extrabold mb-4 tracking-tight">Analyze <span class="text-blue-500">IOCs</span></h2>
+            <p class="text-slate-400 text-lg">ตรวจสอบ IP, Domain หรือ Hash เพื่อวิเคราะห์ความปลอดภัยในระดับลึก</p>
+        </div>
+
+        <div class="w-full max-w-3xl">
+            {% if error %}
+            <div class="mb-6 flex items-center bg-red-900/30 border border-red-500/50 text-red-200 px-6 py-4 rounded-2xl animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.2)]">
+                <i class="fas fa-exclamation-triangle mr-3 text-red-500"></i>
+                <span class="font-medium">{{ error }}</span>
+            </div>
+            {% endif %}
+
+            <form action="/search" method="post" class="relative group">
+                <input type="text" name="user_input" id="search_input" required 
+                    value="{{ old_input if old_input else '' }}"
+                    placeholder="ใส่ IP Address, Domain หรือ File Hash (SHA256)..." 
+                    class="w-full bg-slate-800 border-2 border-slate-700 rounded-2xl py-5 px-6 text-lg focus:outline-none focus:border-blue-500 shadow-2xl transition-all group-hover:border-slate-600">
+                
+                <button type="submit" class="absolute right-3 top-3 bg-blue-600 hover:bg-blue-500 px-8 py-2.5 rounded-xl font-bold transition shadow-lg active:scale-95 flex items-center">
+                    <i class="fas fa-search mr-2 text-sm"></i> SEARCH
+                </button>
+            </form>
+
+            <div class="mt-8">
+                <p class="text-slate-500 text-[10px] uppercase font-bold tracking-[0.2em] mb-4 text-center">Try Example IOCs</p>
+                <div class="flex flex-wrap justify-center gap-3">
+                    <button onclick="setSearch('193.163.125.138')" class="text-xs bg-slate-800/50 hover:bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-lg text-slate-400 hover:text-blue-400 transition">
+                        <i class="fas fa-network-wired mr-1"></i> IP (Phishing)
+                    </button>
+                    <button onclick="setSearch('google.com')" class="text-xs bg-slate-800/50 hover:bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-lg text-slate-400 hover:text-blue-400 transition">
+                        <i class="fas fa-globe mr-1"></i> Domain (Global)
+                    </button>
+                    <button onclick="setSearch('ed01ebfbc9eb5bbea545af4d01bf5f1071661840480439c6e5babe8e080e41aa')" class="text-xs bg-slate-800/50 hover:bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-lg text-slate-400 hover:text-blue-400 transition">
+                        <i class="fas fa-file-code mr-1"></i> Hash (WannaCry)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="p-8 text-center text-slate-600 text-sm border-t border-slate-900">
+        <p>&copy; 2026 IOC Threat Intelligence Aggregation and Confidence.</p>
+    </footer>
+
+    <script>
+        function setSearch(val) {
+            document.getElementById('search_input').value = val;
+        }
+    </script>
+
+</body>
+</html>

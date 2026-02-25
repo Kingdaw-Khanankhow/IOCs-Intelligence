@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IOCs Intelligence</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-[#0f172a] text-slate-200 flex items-center justify-center min-h-screen p-4">
+
+    <div class="bg-slate-800/50 p-8 rounded-3xl border border-slate-700 shadow-2xl w-full max-w-md backdrop-blur-md">
+        
+        <div class="text-center mb-8">
+            <div class="inline-block p-4 bg-blue-600/10 rounded-2xl mb-4">
+                <i class="fas fa-user-plus text-4xl text-blue-500"></i>
+            </div>
+            <h1 class="text-3xl font-bold text-white tracking-tight">Create Account</h1>
+        </div>
+
+        {% if error %}
+        <div class="bg-red-500/10 border border-red-500/50 text-red-400 p-3 rounded-xl mb-4 text-sm text-center flex items-center justify-center">
+            <i class="fas fa-circle-exclamation mr-2"></i> {{ error }}
+        </div>
+        {% endif %}
+
+        <div class="mb-6 p-4 bg-slate-900/50 rounded-2xl border border-slate-700">
+            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-3">Password Requirements:</p>
+            <ul class="grid grid-cols-1 gap-2 text-xs">
+                <li id="rule-length" class="text-slate-500 flex items-center transition-colors">
+                    <i class="fas fa-check-circle mr-2 opacity-50"></i> อย่างน้อย 8 ตัวอักษร
+                </li>
+                <li id="rule-complexity" class="text-slate-500 flex items-center transition-colors">
+                    <i class="fas fa-check-circle mr-2 opacity-50"></i> มีพิมพ์ใหญ่ (A-z), พิมพ์เล็ก (a-z) และตัวเลข
+                </li>
+                <li id="rule-special" class="text-slate-500 flex items-center transition-colors">
+                    <i class="fas fa-check-circle mr-2 opacity-50"></i> มีอักษรพิเศษ (!@#$%^&*)
+                </li>
+            </ul>
+        </div>
+
+        <form action="/register" method="post" id="registerForm" class="space-y-4">
+            <div class="relative">
+                <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"></i>
+                <input type="text" name="username" placeholder="Username" required 
+                       class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-12 py-3.5 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition">
+            </div>
+            
+            <div class="relative">
+                <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"></i>
+                <input type="password" id="password" name="password" placeholder="Password" required 
+                       class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-12 py-3.5 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition">
+                <button type="button" onclick="togglePass()" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300">
+                    <i id="eyeIcon" class="fas fa-eye"></i>
+                </button>
+            </div>
+
+            <button type="submit" id="submitBtn" disabled
+                    class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition shadow-lg shadow-blue-500/20 active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed">
+                Sign Up
+            </button>
+        </form>
+
+        <div class="mt-8 pt-6 border-t border-slate-700/50 text-center">
+            <p class="text-sm text-slate-400">
+                Already have an account? 
+                <a href="/login" class="text-blue-500 font-semibold hover:text-blue-400 transition ml-1">Log In</a>
+            </p>
+            <div class="mt-4">
+                <a href="/" class="text-xs text-slate-500 hover:text-slate-300 transition inline-flex items-center">
+                    <i class="fas fa-arrow-left mr-1"></i> Back to Guest Search
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const passwordInput = document.getElementById('password');
+        const submitBtn = document.getElementById('submitBtn');
+        const rulesUI = {
+            length: document.getElementById('rule-length'),
+            complexity: document.getElementById('rule-complexity'),
+            special: document.getElementById('rule-special')
+        };
+
+        function togglePass() {
+            const icon = document.getElementById('eyeIcon');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+
+        passwordInput.addEventListener('input', () => {
+            const val = passwordInput.value;
+            const isLengthValid = val.length >= 8;
+            const isComplexValid = /[A-Z]/.test(val) && /[a-z]/.test(val) && /[0-9]/.test(val);
+            const isSpecialValid = /[!@#$%^&*(),.?":{}|<>]/.test(val);
+            
+            updateUI(rulesUI.length, isLengthValid);
+            updateUI(rulesUI.complexity, isComplexValid);
+            updateUI(rulesUI.special, isSpecialValid);
+
+            submitBtn.disabled = !(isLengthValid && isComplexValid && isSpecialValid);
+        });
+
+        function updateUI(el, isValid) {
+            if (isValid) {
+                el.classList.remove('text-slate-500');
+                el.classList.add('text-green-500');
+                el.querySelector('i').classList.replace('opacity-50', 'opacity-100');
+            } else {
+                el.classList.remove('text-green-500');
+                el.classList.add('text-slate-500');
+                el.querySelector('i').classList.replace('opacity-100', 'opacity-50');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IOCs Intelligence</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background-color: #0f172a; }
+        .cyber-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+    </style>
+</head>
+<body class="text-slate-200 flex items-center justify-center min-h-screen p-4">
+
+    <div class="cyber-card p-10 rounded-3xl shadow-2xl w-full max-w-md">
+        <div class="text-center mb-10">
+            <div class="inline-block p-4 bg-blue-600/10 rounded-2xl mb-4">
+                <i class="fas fa-shield-halved text-4xl text-blue-500"></i>
+            </div>
+            <h1 class="text-3xl font-bold text-white tracking-tight">Welcome</h1>
+            <p class="text-slate-400 mt-2 text-sm">Sign in to access your search history</p>
+        </div>
+
+        {% if error %}
+        <div class="bg-red-500/10 border border-red-500/50 text-red-400 p-3 rounded-xl mb-6 text-sm flex items-center">
+            <i class="fas fa-circle-exclamation mr-2"></i> {{ error }}
+        </div>
+        {% endif %}
+
+        <form action="/login" method="post" class="space-y-6">
+            <div>
+                <label class="block text-sm font-medium text-slate-400 mb-2 ml-1">Username</label>
+                <div class="relative">
+                    <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"></i>
+                    <input type="text" name="username" required 
+                           class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-12 py-3.5 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
+                           placeholder="Enter your username">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-400 mb-2 ml-1">Password</label>
+                <div class="relative">
+                    <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"></i>
+                    <input type="password" name="password" required 
+                           class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-12 py-3.5 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
+                           placeholder="••••••••">
+                </div>
+            </div>
+
+            <button type="submit" 
+                    class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition shadow-lg shadow-blue-500/20 active:scale-[0.98]">
+                Sign In
+            </button>
+        </form>
+        
+        <div class="mt-10 pt-6 border-t border-slate-700/50 text-center">
+            <p class="text-sm text-slate-400">
+                Don't have an account? 
+                <a href="/register" class="text-blue-500 font-semibold hover:text-blue-400 transition ml-1">Sign up now</a>
+            </p>
+            <div class="mt-4">
+                <a href="/" class="text-xs text-slate-500 hover:text-slate-300 transition">
+                    <i class="fas fa-arrow-left mr-1"></i> Back to Guest Search
+                </a>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

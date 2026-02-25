@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IOCs Intelligence</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-[#0f172a] text-white min-h-screen flex flex-col font-sans">
+
+    <nav class="p-6 border-b border-slate-800 bg-[#0f172a]/50 backdrop-blur-md sticky top-0 z-50">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-blue-500">
+                <a href="/" class="flex items-center hover:opacity-80 transition">
+                    <i class="fas fa-shield-alt mr-2"></i>IOCs Intelligence
+                </a>
+            </h1>
+
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-6">
+                    <span class="text-slate-400 hidden md:block">
+                        <i class="fas fa-user-circle mr-1"></i> 
+                        Welcome, <b class="text-blue-400">{{ username }}</b>
+                    </span>
+                    <a href="/" class="text-slate-300 hover:text-white px-4 py-2 transition text-sm font-medium">
+                        <i class="fas fa-search mr-1"></i> New Search
+                    </a>
+                    <a href="/logout" class="text-red-400 hover:text-red-300 text-sm font-medium transition">
+                        Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-1 container mx-auto px-4 py-12 max-w-6xl">
+        
+        <div class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div>
+                <h2 class="text-4xl font-extrabold mb-2 tracking-tight">My <span class="text-blue-500">History</span></h2>
+                <p class="text-slate-400">ประวัติการตรวจสอบและวิเคราะห์ภัยคุกคาม</p>
+            </div>
+            
+            <button onclick="resetFilters()" class="text-xs bg-slate-800/50 hover:bg-slate-800 border border-slate-700 px-4 py-2 rounded-lg text-slate-400 hover:text-red-400 transition">
+                <i class="fas fa-sync-alt mr-1"></i> ล้างการกรองทั้งหมด
+            </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8 bg-slate-900/40 p-6 rounded-2xl border border-slate-800">
+            <div class="relative">
+                <i class="fas fa-search absolute left-3 top-3.5 text-slate-500 text-sm"></i>
+                <input type="text" id="historySearch" onkeyup="filterTable()" placeholder="ค้นหา IOC Target..." 
+                    class="w-full bg-slate-800 border border-slate-700 rounded-xl py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:border-blue-500 transition">
+            </div>
+            
+            <div class="relative">
+                <input type="date" id="dateFilter" onchange="filterTable()" 
+                    class="w-full bg-slate-800 border border-slate-700 rounded-xl py-2.5 px-4 text-sm focus:outline-none focus:border-blue-500 transition text-slate-300">
+            </div>
+
+            <select id="typeFilter" onchange="filterTable()" class="bg-slate-800 border border-slate-700 rounded-xl py-2.5 px-4 text-sm focus:outline-none focus:border-blue-500 transition text-slate-300">
+                <option value="">ทุกประเภท</option>
+                <option value="IP">IP Address</option>
+                <option value="DOMAIN">Domain</option>
+                <option value="HASH">Hash</option>
+            </select>
+
+            <select id="riskFilter" onchange="filterTable()" class="bg-slate-800 border border-slate-700 rounded-xl py-2.5 px-4 text-sm focus:outline-none focus:border-blue-500 transition text-slate-300">
+                <option value="">ทุกระดับความเสี่ยง</option>
+                <option value="High">🔴 High</option>
+                <option value="Medium">🟡 Medium</option>
+                <option value="Low">🟢 Low </option>
+                <option value="Clean">🟢 Clean </option>
+            </select>
+        </div>
+
+        <div class="bg-slate-900/20 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
+            <table class="w-full text-left border-collapse" id="historyTable">
+                <thead class="bg-slate-800/50 border-b border-slate-800">
+                    <tr>
+                        <th class="px-6 py-4 text-slate-400 text-xs font-bold uppercase tracking-wider">วันที่สแกน</th>
+                        <th class="px-6 py-4 text-slate-400 text-xs font-bold uppercase tracking-wider">IOC Target</th>
+                        <th class="px-6 py-4 text-slate-400 text-xs font-bold uppercase tracking-wider">ประเภท</th>
+                        <th class="px-6 py-4 text-slate-400 text-xs font-bold uppercase tracking-wider text-center">ระดับความเสี่ยง</th>
+                        <th class="px-6 py-4 text-slate-400 text-xs font-bold uppercase tracking-wider text-right">ความเชื่อมั่น</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800">
+                    {% for item in history %}
+                    <tr class="hover:bg-slate-800/30 transition group">
+                        <td class="px-6 py-4 text-sm text-slate-500 col-date">
+                            {{ item.searched_at.strftime('%d/%m/%Y') if item.searched_at else 'N/A' }}
+                        </td>
+                        <td class="px-6 py-4 font-mono text-sm text-blue-400 col-target">
+                            {{ item.ioc_value }}
+                        </td>
+                        
+                        {% if item.ioc_details %}
+                            <td class="px-6 py-4 text-xs font-bold text-slate-400 col-type">
+                                <span class="bg-slate-800 px-2 py-1 rounded">{{ item.ioc_details.ioc_type | upper }}</span>
+                            </td>
+                            {% set conf = item.ioc_details.result_data.get('confident', {}) %}
+                            <td class="px-6 py-4 text-center col-risk">
+                                {% set risk = conf.get('likelihood_level', 'unknown') | lower %}
+                                <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase 
+                                    {% if risk == 'high' %} bg-red-900/30 text-red-500 border border-red-500/30
+                                    {% elif risk == 'moderate' %} bg-yellow-900/30 text-yellow-500 border border-yellow-500/30
+                                    {% else %} bg-green-900/30 text-green-500 border border-green-500/30 {% endif %}">
+                                    {{ conf.get('likelihood_level', 'Unknown') }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <span class="text-sm font-bold {{ 'text-red-500' if conf.get('total_confident', 0) >= 80 else 'text-slate-300' }}">
+                                    {{ conf.get('total_confident', 0) }}%
+                                </span>
+                            </td>
+                        {% else %}
+                            <td class="px-6 py-4 col-type">-</td>
+                            <td class="px-6 py-4 text-center col-risk">
+                                <span class="px-3 py-1 rounded-full text-[10px] font-bold bg-slate-800 text-slate-500">No Data</span>
+                            </td>
+                            <td class="px-6 py-4 text-right">0%</td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <footer class="p-8 text-center text-slate-600 text-sm border-t border-slate-900">
+        <p>&copy; 2026 IOC Threat Intelligence Aggregation and Confidence.</p>
+    </footer>
+
+    <script>
+        function filterTable() {
+            let input = document.getElementById("historySearch").value.toUpperCase();
+            let typeVal = document.getElementById("typeFilter").value.toUpperCase();
+            let riskVal = document.getElementById("riskFilter").value.toUpperCase();
+            let dateVal = document.getElementById("dateFilter").value; 
+            
+            let table = document.getElementById("historyTable");
+            let tr = table.getElementsByTagName("tr");
+
+            for (let i = 1; i < tr.length; i++) {
+                let tdDate = tr[i].querySelector(".col-date");
+                let tdTarget = tr[i].querySelector(".col-target");
+                let tdType = tr[i].querySelector(".col-type");
+                let tdRisk = tr[i].querySelector(".col-risk");
+
+                if (tdDate && tdTarget && tdType && tdRisk) {
+                    let txtDate = tdDate.textContent || tdDate.innerText; 
+                    let txtTarget = tdTarget.textContent || tdTarget.innerText;
+                    let txtType = tdType.textContent || tdType.innerText;
+                    let txtRisk = tdRisk.textContent || tdRisk.innerText;
+
+                    let dateMatch = true;
+                    if (dateVal) {
+                        let parts = txtDate.trim().split('/');
+                        let formattedTableDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
+                        dateMatch = (formattedTableDate === dateVal);
+                    }
+
+                    let matchesSearch = txtTarget.toUpperCase().includes(input);
+                    let matchesType = typeVal === "" || txtType.toUpperCase().includes(typeVal);
+                    let matchesRisk = riskVal === "" || txtRisk.toUpperCase().includes(riskVal);
+
+                    if (dateMatch && matchesSearch && matchesType && matchesRisk) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+                }
+            }
+        }
+
+        function resetFilters() {
+            document.getElementById("historySearch").value = "";
+            document.getElementById("typeFilter").value = "";
+            document.getElementById("riskFilter").value = "";
+            document.getElementById("dateFilter").value = "";
+            filterTable();
+        }
+    </script>
+</body>
+</html>

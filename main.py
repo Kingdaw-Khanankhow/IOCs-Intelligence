@@ -80,7 +80,6 @@ def main_process(user_input):
 
     report = {"target": clean_value, "type": ioc_type, "details": {}}
     try:
-        # API Data Fetching
         if ioc_type == "ip":
             report["details"]["virustotal"] = check_vt("ip", clean_value) or {}
             report["details"]["abuseipdb"] = check_abuse(clean_value) or {}
@@ -96,7 +95,6 @@ def main_process(user_input):
         abuse = report["details"].get("abuseipdb", {}) or {}
         bazaar = report["details"].get("malwarebazaar", {}) or {}
 
-        # Scoring Logic
         total_confident, _ = confidence(ioc_type, report["details"])
         score, level = get_likelihood_score(total_confident)
 
@@ -111,7 +109,6 @@ def main_process(user_input):
 
         most_common_threat = Counter(labels).most_common(1)[0][0].capitalize() if labels else "Clean / Undetected"
 
-        # UI Mapping
         ui_data = {
             "target": clean_value,
             "type": ioc_type,
@@ -150,21 +147,20 @@ def main_process(user_input):
         logger.error(traceback.format_exc())
         return {"status": "error", "message": str(e)}
 
-# Routes
+# --- Routes ---
 
 @app.get("/")
 async def index(request: Request, username: str = Depends(get_current_user)):
     return templates.TemplateResponse(
-    request=request, 
-    name="index.html", 
-    context={"username": username, "error": None}
-)
+        request=request, 
+        name="index.html", 
+        context={"username": username, "error": None}
+    )
 
 @app.post("/search")
 async def search_ioc(request: Request, user_input: str = Form(...), db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
     target = user_input.strip()
     try:
-        # Check Cache 
         db_ioc = db.query(models.IOCCache).filter(models.IOCCache.ioc_value == target).first()
         cache_duration = timedelta(days=1)
         now = datetime.now(timezone.utc)
@@ -182,15 +178,17 @@ async def search_ioc(request: Request, user_input: str = Form(...), db: Session 
         else:
             report = main_process(target)
             if report.get("status") == "error":
-                return templates.TemplateResponse("index.html", {"request": request, "error": report["message"], "username": current_user})
+                return templates.TemplateResponse(
+                    request=request, 
+                    name="index.html", 
+                    context={"error": report["message"], "username": current_user}
+                )
             
             if db_ioc:
-                # Update existing record
                 db_ioc.result_data = report
                 db_ioc.last_updated = now
                 db.commit()
             else:
-                # Create new record
                 try:
                     new_cache = models.IOCCache(
                         ioc_value=report["target"], 
@@ -205,7 +203,6 @@ async def search_ioc(request: Request, user_input: str = Form(...), db: Session 
                     db_ioc = db.query(models.IOCCache).filter(models.IOCCache.ioc_value == target).first()
                     if db_ioc: report = db_ioc.result_data
 
-        # ประวัติการค้นหา
         if current_user:
             user = db.query(models.User).filter(models.User.username == current_user).first()
             if user:
@@ -217,46 +214,66 @@ async def search_ioc(request: Request, user_input: str = Form(...), db: Session 
                     db.rollback()
                     logger.warning(f"Could not save history: {e}")
 
-        return templates.TemplateResponse("detail.html", {"request": request, "report": report, "username": current_user})
+        return templates.TemplateResponse(
+            request=request, 
+            name="detail.html", 
+            context={"report": report, "username": current_user}
+        )
     except Exception as e:
         db.rollback()
         logger.error(traceback.format_exc())
-        return templates.TemplateResponse("index.html", {"request": request, "error": "เกิดข้อผิดพลาดในการประมวลผล", "username": current_user})
+        return templates.TemplateResponse(
+            request=request, 
+            name="index.html", 
+            context={"error": "เกิดข้อผิดพลาดในการประมวลผล", "username": current_user}
+        )
 
 @app.get("/register")
 async def register_page(request: Request):
     return templates.TemplateResponse(
-    request=request, 
-    name="register.html", 
-    context={"error": None}
-)
+        request=request, 
+        name="register.html", 
+        context={"error": None}
+    )
 
 @app.post("/register")
 async def register_user(request: Request, username: str = Form(...), password: str = Form(...), db: Session = Depends(get_db)):
     try:
         if db.query(models.User).filter(models.User.username == username).first():
-            return templates.TemplateResponse("register.html", {"request": request, "error": "ชื่อผู้ใช้นี้ถูกใช้งานแล้ว"})
+            return templates.TemplateResponse(
+                request=request, 
+                name="register.html", 
+                context={"error": "ชื่อผู้ใช้นี้ถูกใช้งานแล้ว"}
+            )
         new_user = models.User(username=username, hashed_password=get_password_hash(password))
         db.add(new_user)
         db.commit()
         return RedirectResponse(url="/login", status_code=303)
     except Exception:
         db.rollback()
-        return templates.TemplateResponse("register.html", {"request": request, "error": "ไม่สามารถลงทะเบียนได้"})
+        return templates.TemplateResponse(
+            request=request, 
+            name="register.html", 
+            context={"error": "ไม่สามารถลงทะเบียนได้"}
+        )
 
 @app.get("/login")
 async def login_page(request: Request):
     return templates.TemplateResponse(
-    request=request, 
-    name="login.html", 
-    context={"error": None}
+        request=request, 
+        name="login.html", 
+        context={"error": None}
     )
 
 @app.post("/login")
-async def login(username: str = Form(...), password: str = Form(...), db: Session = Depends(get_db)):
+async def login(request: Request, username: str = Form(...), password: str = Form(...), db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.username == username).first()
     if not user or not verify_password(password, user.hashed_password):
-        return templates.TemplateResponse("login.html", {"request": {"type": "http"}, "error": "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง"})
+        return templates.TemplateResponse(
+            request=request, 
+            name="login.html", 
+            context={"error": "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง"}
+        )
     
     token = create_access_token(data={"sub": user.username})
     resp = RedirectResponse(url="/", status_code=303)
@@ -287,7 +304,15 @@ async def view_history(request: Request, db: Session = Depends(get_db), current_
             .filter(models.SearchHistory.user_id == user.id)\
             .order_by(models.SearchHistory.searched_at.desc())\
             .all()
-        return templates.TemplateResponse("history.html", {"request": request, "username": current_user, "history": history_items})
+        return templates.TemplateResponse(
+            request=request, 
+            name="history.html", 
+            context={"username": current_user, "history": history_items}
+        )
     except Exception as e:
         logger.error(f"History error -> {e}")
-        return templates.TemplateResponse("index.html", {"request": request, "error": "Database Error", "username": current_user})
+        return templates.TemplateResponse(
+            request=request, 
+            name="index.html", 
+            context={"error": "Database Error", "username": current_user}
+        )

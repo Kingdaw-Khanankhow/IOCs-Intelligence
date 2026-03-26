@@ -201,7 +201,7 @@ async def search_ioc(request: Request, user_input: str = Form(...), db: Session 
                     db_ioc = db.query(models.IOCCache).filter(models.IOCCache.ioc_value == target).first()
                     if db_ioc: report = db_ioc.result_data
 
-        # 3. บันทึกประวัติการค้นหา
+        # ประวัติการค้นหา
         if current_user:
             user = db.query(models.User).filter(models.User.username == current_user).first()
             if user:

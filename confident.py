@@ -3,7 +3,6 @@ def confidence(ioc_type, details):
     ฟังก์ชันคำนวณระดับความเชื่อมั่น (Confidence Score) 
     โดยใช้หลักการ Normalization และ Weighted Sum
     """
-    # 1. กำหนดค่าเริ่มต้นเพื่อป้องกัน UnboundLocalError
     norm = {}
     weights = {}
     is_any_malicious = False

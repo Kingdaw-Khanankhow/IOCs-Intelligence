@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IOCs Intelligence</title>
+    <title>IOCs Intelligence | History</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
@@ -105,7 +105,8 @@
                                 {% set risk = conf.get('likelihood_level', 'unknown') | lower %}
                                 <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase 
                                     {% if risk == 'high' %} bg-red-900/30 text-red-500 border border-red-500/30
-                                    {% elif risk == 'moderate' %} bg-yellow-900/30 text-yellow-500 border border-yellow-500/30
+                                    {# แก้ไขส่วน Medium เป็นสีเหลืองตรงนี้ #}
+                                    {% elif risk == 'medium' or risk == 'moderate' %} bg-yellow-400/10 text-yellow-500 border border-yellow-500/30
                                     {% else %} bg-green-900/30 text-green-500 border border-green-500/30 {% endif %}">
                                     {{ conf.get('likelihood_level', 'Unknown') }}
                                 </span>

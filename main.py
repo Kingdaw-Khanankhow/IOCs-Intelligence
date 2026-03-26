@@ -180,7 +180,7 @@ async def search_ioc(request: Request, user_input: str = Form(...), db: Session 
             if report.get("status") == "error":
                 return templates.TemplateResponse(
                     request=request, 
-                    name="index.html", 
+                   name="index.html", 
                     context={"error": report["message"], "username": current_user}
                 )
             

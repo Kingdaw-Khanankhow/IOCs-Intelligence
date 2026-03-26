@@ -1,0 +1,16 @@
+fastapi
+uvicorn
+sqlalchemy
+psycopg2-binary
+python-dotenv
+httpx
+python-multipart
+passlib[bcrypt]
+python-jose[cryptography]
+pandas
+numpy==1.26.4
+jinja2
+aiofiles
+ioc-finder
+iocextract
+requests

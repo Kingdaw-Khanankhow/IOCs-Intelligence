@@ -225,7 +225,11 @@ async def search_ioc(request: Request, user_input: str = Form(...), db: Session 
 
 @app.get("/register")
 async def register_page(request: Request):
-    return templates.TemplateResponse("register.html", {"request": request, "error": None})
+    return templates.TemplateResponse(
+    request=request, 
+    name="register.html", 
+    context={"error": None}
+)
 
 @app.post("/register")
 async def register_user(request: Request, username: str = Form(...), password: str = Form(...), db: Session = Depends(get_db)):
@@ -242,7 +246,11 @@ async def register_user(request: Request, username: str = Form(...), password: s
 
 @app.get("/login")
 async def login_page(request: Request):
-    return templates.TemplateResponse("login.html", {"request": request, "error": None})
+    return templates.TemplateResponse(
+    request=request, 
+    name="login.html", 
+    context={"error": None}
+    )
 
 @app.post("/login")
 async def login(username: str = Form(...), password: str = Form(...), db: Session = Depends(get_db)):

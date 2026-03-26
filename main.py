@@ -154,7 +154,11 @@ def main_process(user_input):
 
 @app.get("/")
 async def index(request: Request, username: str = Depends(get_current_user)):
-    return templates.TemplateResponse("index.html", {"request": request, "username": username, "error": None})
+    return templates.TemplateResponse(
+    request=request, 
+    name="index.html", 
+    context={"username": username, "error": None}
+)
 
 @app.post("/search")
 async def search_ioc(request: Request, user_input: str = Form(...), db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
